@@ -1,0 +1,52 @@
+version: "3"
+
+# Set up a subnet and assign both pihole and coredns to an ip so they can communicate together
+networks:
+  coredns:
+    ipam:
+      config:
+       - subnet: 172.10.10.0/24
+
+# More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"
+      - "80:80/tcp"
+      - "443:443/tcp"
+    environment:
+      TZ: 'America/Los_Angeles'
+      WEBPASSWORD: ''
+      # WEBPASSWORD: 'set a secure password here or it will be random'
+    # Volumes store your data between container upgrades
+    volumes:
+      - './etc-pihole/:/etc/pihole/'
+      - './etc-dnsmasq.d/:/etc/dnsmasq.d/'
+    # Change this DNS to the gateway of your machine/pi
+    dns:
+      - 10.30.0.1
+      - 127.0.0.1
+    # Recommended but not required (DHCP needs NET_ADMIN)
+    #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    links:
+      - 'coredns'
+    networks:
+      coredns:
+        ipv4_address: 172.10.10.99
+  coredns:
+    image: "coredns/coredns"
+    volumes:
+      - "./coredns/:/etc/coredns/"
+    command: -conf /etc/coredns/coreconfig-up
+    restart: unless-stopped
+    container_name: coredns
+    networks:
+      coredns:
+        ipv4_address: 172.10.10.100
