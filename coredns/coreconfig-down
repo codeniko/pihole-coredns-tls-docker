@@ -1,0 +1,5 @@
+tls://.:853 {
+  tls /etc/coredns/cert.pem /etc/coredns/key.pem
+  forward . 172.10.10.90:53
+}
+

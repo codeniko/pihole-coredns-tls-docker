@@ -8,7 +8,18 @@ Easily set up pihole and coredns to use DNS over TLS with Docker. Currently used
 5) Run `docker-compose up -d`
 6) Go to IP of server to enter pihole dashboard, deselect prior DNS settings and set DNS custom1 to `172.10.10.100#53` for coredns
 
-### Verify DNS over TLS
+### Verify outgoing DNS over TLS to Cloudflare
 Use any of the following:
 1) https://www.cloudflare.com/ssl/encrypted-sni/
 2) https://1.1.1.1/help
+
+### Verify incoming DNS over TLS requests on port 853
+`kdig @IP +tls example.com` where IP is ip address of device running the containers
+
+### Useful debugging commands
+Open up shell on pihole container
+`docker exec -ti pihole bash`
+
+View all details about some container
+`docker inspect pihole`
+

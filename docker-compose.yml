@@ -36,17 +36,33 @@ services:
       - NET_ADMIN
     restart: unless-stopped
     links:
-      - 'coredns'
+      - 'coredns_upstream'
     networks:
       coredns:
-        ipv4_address: 172.10.10.99
-  coredns:
+        ipv4_address: 172.10.10.90
+
+  coredns_upstream:
     image: "coredns/coredns"
     volumes:
       - "./coredns/:/etc/coredns/"
     command: -conf /etc/coredns/coreconfig-up
     restart: unless-stopped
-    container_name: coredns
+    container_name: coredns_up
     networks:
       coredns:
         ipv4_address: 172.10.10.100
+
+  coredns_downstream:
+    image: "coredns/coredns"
+    ports:
+      - "853:853/tcp"
+    volumes:
+      - "./coredns/:/etc/coredns/"
+    command: -conf /etc/coredns/coreconfig-down
+    restart: unless-stopped
+    container_name: coredns_down
+    links:
+      - 'pihole'
+    networks:
+      coredns:
+        ipv4_address: 172.10.10.101
